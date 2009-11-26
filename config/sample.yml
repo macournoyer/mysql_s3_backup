@@ -1,0 +1,10 @@
+mysql:
+  database: talker_development
+  user: root
+  bin_log_dir: /var/lib/mysql/binlog
+
+s3:
+  bucket: mysql_backups_test
+  access_key_id: XXXXXXXXXXXXXXX
+  secret_access_key: XXXXXXXXXXXXXXXXXXXXXX
+  

@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby -s
+require "mysql_s3_backup"
+require "yaml"
+
+config_file = $c
+
+abort <<-USAGE unless config_file.is_a?(String) && ARGV.size > 0
+usage:
+  
+  Backing up:
+  
+    mysql_s3_backup -c=<config.yml> full
+  
+  Incremental backups:
+  
+    mysql_s3_backup -c=<config.yml> inc
+  
+  Restore a backup:
+  
+    mysql_s3_backup -c=<config.yml> restore <name>
+
+USAGE
+
+config = YAML.load_file(config_file).symbolize_keys
+mysql_config = config[:mysql].symbolize_keys
+s3_config = config[:s3].symbolize_keys
+
+mysql = MysqlS3Backup::Mysql.new(mysql_config)
+bucket = MysqlS3Backup::Bucket.new(s3_config.delete(:bucket), s3_config)
+backup = MysqlS3Backup::Backup.new(mysql, bucket)
+
+backup.send(*ARGV)

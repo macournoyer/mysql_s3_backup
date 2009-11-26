@@ -1,0 +1,5 @@
+require "mysql_s3_backup/hash_ext"
+require "mysql_s3_backup/shell"
+require "mysql_s3_backup/bucket"
+require "mysql_s3_backup/mysql"
+require "mysql_s3_backup/backup"
