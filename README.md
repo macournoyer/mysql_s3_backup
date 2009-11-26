@@ -1,9 +1,9 @@
 # Send you Mysql backups to S3
-And simple backup script for Mysql and S3 with incremental backups.
+A simple backup script for Mysql and S3 with incremental backups.
+
+It's all based on Paul Dowman's blog post: http://pauldowman.com/2009/02/08/mysql-s3-backup/, so read this first.
 
 ## Configuration
-
-Based on Paul Dowman's http://github.com/pauldowman/blog_code_examples so read this first.
 
 To use incremental backups you need to enable binary logging by making sure that the MySQL config file (my.cnf) has the following line in it:
 
