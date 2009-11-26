@@ -16,21 +16,34 @@ The MySQL user needs to have the RELOAD and the SUPER privileges, these can be g
 
 ## Usage
 
-Backing up:
+Create a YAML config file:
 
-  mysql_s3_backup -c=your_config.yml full
+    mysql:
+      database: muffins_development
+      user: root
+      bin_log: /var/lib/mysql/binlog/mysql-bin
+    
+    s3:
+      bucket: db_backups
+      access_key_id: XXXXXXXXXXXXXXX
+      secret_access_key: XXXXXXXXXXXXXXXXXXXXXX
+    
 
-Incremental backups:
+Create a full backup:
 
-  mysql_s3_backup -c=your_config.yml inc
+    mysql_s3_backup -c=your_config.yml full
 
-Restore the latest backup:
+Create an incremental backup:
 
-  mysql_s3_backup -c=your_config.yml restore
+    mysql_s3_backup -c=your_config.yml inc
 
-Restore a specific backup:
+Restore the latest backup (applying incremental backups):
 
-  mysql_s3_backup -c=your_config.yml restore 20091126112233
+    mysql_s3_backup -c=your_config.yml restore
+
+Restore a specific backup (NOT applying incremental backups):
+
+    mysql_s3_backup -c=your_config.yml restore 20091126112233
 
 ## Running the specs
 
