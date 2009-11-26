@@ -23,6 +23,10 @@ module MysqlS3Backup
       run %{mysql -e "#{sql}" #{cli_options}}
     end
     
+    def execute_file(file)
+      run "cat '#{file}' | mysql #{cli_options}"
+    end
+    
     def dump(file)
       cmd = "mysqldump --quick --single-transaction --create-options -u'#{@user}'"
       cmd += " --flush-logs --master-data=2 --delete-master-logs" if @bin_log_path

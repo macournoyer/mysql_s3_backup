@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby -s
 require "mysql_s3_backup"
-require "yaml"
 
 config_file = $c
 
@@ -21,12 +20,4 @@ usage:
 
 USAGE
 
-config = YAML.load_file(config_file).symbolize_keys
-mysql_config = config[:mysql].symbolize_keys
-s3_config = config[:s3].symbolize_keys
-
-mysql = MysqlS3Backup::Mysql.new(mysql_config)
-bucket = MysqlS3Backup::Bucket.new(s3_config.delete(:bucket), s3_config)
-backup = MysqlS3Backup::Backup.new(mysql, bucket)
-
-backup.send(*ARGV)
+MysqlS3Backup::Config.from_yaml_file(config_file).backup.send(*ARGV)

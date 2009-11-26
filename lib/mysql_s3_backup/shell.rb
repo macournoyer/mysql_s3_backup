@@ -4,8 +4,10 @@ module MysqlS3Backup
   module Shell
     def run(command)
       puts command if $VERBOSE
-      result = system(command)
-      raise ShellCommandError, "error, process exited with status #{$?.exitstatus}" unless result
+      result = `#{command}`.chomp
+      puts result if $VERBOSE
+      raise ShellCommandError, "error, process exited with status #{$?.exitstatus}: #{result}" unless $?.success?
+      result
     end
   end
 end

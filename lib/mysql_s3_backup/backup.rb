@@ -2,18 +2,19 @@ require 'tempfile'
 
 module MysqlS3Backup
   class Backup
+    attr_reader :mysql, :bucket
+    
     def initialize(mysql, bucket)
       @mysql = mysql
       @bucket = bucket
+      @bin_log_prefix = "#{@mysql.database}/bin_logs"
     end
     
-    def full
-      name = make_new_name
-      
+    def full(name=make_new_name)
       # When the full backup runs it delete any binary log files that might already exist
       # in the bucket. Otherwise the restore will try to restore them even though they’re
       # older than the full backup.
-      @bucket.delete_all "bin_log"
+      @bucket.delete_all @bin_log_prefix
       
       with_temp_file do |file|
         @mysql.dump(file)
@@ -24,7 +25,7 @@ module MysqlS3Backup
     
     def incremental
       @mysql.each_bin_log do |log|
-        @bucket.store "bin_log/#{File.basename(log)}", log
+        @bucket.store "#{@bin_log_prefix}/#{File.basename(log)}", log
       end
     end
     alias :inc :incremental
@@ -38,7 +39,7 @@ module MysqlS3Backup
       
       if name == "latest"
         # Restoring binary log files
-        @bucket.find("bin_log/").sort.each do |log|
+        @bucket.find("#{@bin_log_prefix}/").sort.each do |log|
           with_temp_file do |file|
             @bucket.fetch log, file
             @mysql.apply_bin_log file
@@ -50,7 +51,7 @@ module MysqlS3Backup
     private
       def dump_file_name(name)
         raise ArgumentError, "Need a backup name" unless name.is_a?(String)
-        "dump-#{@mysql.database}-#{name}.sql.gz"
+        "#{@mysql.database}/dumps/#{name}.sql.gz"
       end
     
       def make_new_name
