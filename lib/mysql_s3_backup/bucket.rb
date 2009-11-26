@@ -33,5 +33,13 @@ module MysqlS3Backup
         end
       end
     end
+    
+    def find(prefix)
+      AWS::S3::Bucket.objects(@name, :prefix => prefix).map { |obj| obj.key }
+    end
+    
+    def delete_all(prefix)
+      AWS::S3::Bucket.objects(@name, :prefix => prefix).each { |obj| obj.delete }
+    end
   end
 end

@@ -10,6 +10,11 @@ module MysqlS3Backup
     def full
       name = make_new_name
       
+      # When the full backup runs it delete any binary log files that might already exist
+      # in the bucket. Otherwise the restore will try to restore them even though they’re
+      # older than the full backup.
+      @bucket.delete_all "bin_log"
+      
       with_temp_file do |file|
         @mysql.dump(file)
         @bucket.store(dump_file_name(name), file)
@@ -18,23 +23,27 @@ module MysqlS3Backup
     end
     
     def incremental
-      raise "Set bin_log_dir and enable binary logging in Mysql to use incremental backups" unless @mysql.bin_log_dir
-      # TODO
-      # @mysql.execute("flush logs")
-      # logs = Dir.glob("#{@mysql_bin_log_dir}/mysql-bin.[0-9]*").sort
-      # logs_to_archive = logs[0..-2] # all logs except the last
-      # logs_to_archive.each do |log|
-      #   # The following executes once for each filename in logs_to_archive
-      #   AWS::S3::S3Object.store(File.basename(log), open(log), @s3_bucket)
-      # end
-      # @mysql.execute "purge master logs to '#{File.basename(logs[-1])}'"
+      @mysql.each_bin_log do |log|
+        @bucket.store "bin_log/#{File.basename(log)}", log
+      end
     end
     alias :inc :incremental
     
     def restore(name="latest")
+      # restore from the dump file
       with_temp_file do |file|
         @bucket.fetch(dump_file_name(name), file)
         @mysql.restore(file)
+      end
+      
+      if name == "latest"
+        # Restoring binary log files
+        @bucket.find("bin_log/").sort.each do |log|
+          with_temp_file do |file|
+            @bucket.fetch log, file
+            @mysql.apply_bin_log file
+          end
+        end
       end
     end
     
