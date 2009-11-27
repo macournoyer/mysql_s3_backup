@@ -10,6 +10,7 @@ module MysqlS3Backup
       @password = options[:password]
       @database = options[:database] || raise(ArgumentError, "database required")
       @bin_log_path = options[:bin_log]
+      @bin_path = options[:bin_path]
     end
     
     def cli_options
@@ -20,15 +21,15 @@ module MysqlS3Backup
     end
     
     def execute(sql)
-      run %{mysql -e "#{sql}" #{cli_options}}
+      run %{#{@bin_path}mysql -e "#{sql}" #{cli_options}}
     end
     
     def execute_file(file)
-      run "cat '#{file}' | mysql #{cli_options}"
+      run "cat '#{file}' | #{@bin_path}mysql #{cli_options}"
     end
     
     def dump(file)
-      cmd = "mysqldump --quick --single-transaction --create-options -u'#{@user}'"
+      cmd = "#{@bin_path}mysqldump --quick --single-transaction --create-options -u'#{@user}'"
       cmd += " --flush-logs --master-data=2 --delete-master-logs" if @bin_log_path
       cmd += " -p'#{@password}'" if @password
       cmd += " #{@database} | gzip > #{file}"
@@ -36,7 +37,7 @@ module MysqlS3Backup
     end
     
     def restore(file)
-      run "gunzip -c #{file} | mysql #{cli_options}"
+      run "gunzip -c #{file} | #{@bin_path}mysql #{cli_options}"
     end
     
     def each_bin_log
@@ -50,7 +51,7 @@ module MysqlS3Backup
     end
     
     def apply_bin_log(file)
-      cmd = "mysqlbinlog --database=#{@database} #{file} | mysql -u#{@user} "
+      cmd = "#{@bin_path}mysqlbinlog --database=#{@database} #{file} | mysql -u#{@user} "
       cmd += " -p'#{@password}' " if @password
       run cmd
     end

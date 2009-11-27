@@ -1,10 +1,18 @@
 mysql:
+  # Database name to backup
   database: muffins_development
+  # Mysql user and password to execute commands
   user: root
+  password: secret
+  # Path to mysql binaries, like mysql, mysqldump (optional)
+  bin_path: /usr/bin/
+  # Path to the binary logs, should match the bin_log option in your my.cnf
   bin_log: /var/lib/mysql/binlog/mysql-bin
 
 s3:
+  # S3 bucket name to backup to
   bucket: db_backups
+  # S3 credentials
   access_key_id: XXXXXXXXXXXXXXX
   secret_access_key: XXXXXXXXXXXXXXXXXXXXXX
   
