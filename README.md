@@ -1,4 +1,4 @@
-# Send you Mysql backups to S3
+# Send your Mysql backups to S3
 A simple backup script for Mysql and S3 with incremental backups.
 
 It's all based on Paul Dowman's blog post: http://pauldowman.com/2009/02/08/mysql-s3-backup/, so read this first.
